@@ -21,6 +21,9 @@ import com.yinghua.player.data.model.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import com.yinghua.player.ui.theme.*
+import java.text.SimpleDateFormat
+import java.util.*
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +35,7 @@ fun SettingsScreen(
     val videoCount by viewModel.videoCount.collectAsStateWithLifecycle()
     val folderCount by viewModel.folderCount.collectAsStateWithLifecycle()
     val isScanning by viewModel.isScanning.collectAsStateWithLifecycle()
+    val lastScanTime by viewModel.lastScanTime.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -57,7 +61,11 @@ fun SettingsScreen(
         ) {
             // ── Scan ──────────────────────────────────────────────────────
             SettingsSectionCard(title = "视频扫描") {
-                SettingsInfoRow("已扫描", "$folderCount 个文件夹・$videoCount 个视频")
+                ScanStatusRows(
+                    lastScanTime = lastScanTime,
+                    folderCount = folderCount,
+                    videoCount = videoCount,
+                )
                 HorizontalDivider(color = DividerColor, modifier = Modifier.padding(horizontal = 16.dp))
                 ListItem(
                     headlineContent = {
@@ -173,6 +181,44 @@ fun SettingsScreen(
             }
 
             Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+
+@Composable
+private fun ScanStatusRows(
+    lastScanTime: Long,
+    folderCount: Int,
+    videoCount: Int,
+) {
+    val timeStr = if (lastScanTime > 0L) {
+        SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(Date(lastScanTime))
+    } else {
+        "从未扫描"
+    }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+        // Row 1: label
+        Text(
+            text = "扫描状态",
+            style = MaterialTheme.typography.labelMedium.copy(color = TextHint),
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+        // Row 2: scan time + counts
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "扫描时间  $timeStr",
+                style = MaterialTheme.typography.bodyMedium.copy(color = TextSecondary),
+            )
+            Text(
+                text = "$folderCount 个文件夹  $videoCount 个视频",
+                style = MaterialTheme.typography.bodyMedium.copy(color = TextSecondary),
+            )
         }
     }
 }

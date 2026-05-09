@@ -143,15 +143,6 @@ private fun FolderGrid(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        if (lastScanTime > 0L) {
-            item(span = { GridItemSpan(2) }) {
-                ScanSummaryChip(
-                    folderCount = folders.size,
-                    lastScanTime = lastScanTime,
-                )
-            }
-        }
-
         items(folders, key = { it.path }) { folder ->
             FolderCard(
                 folder = folder,

@@ -8,6 +8,7 @@ import com.yinghua.player.data.repository.VideoRepository
 import com.yinghua.player.utils.MediaScanner
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,6 +29,10 @@ class SettingsViewModel @Inject constructor(
 
     private val _isScanning = MutableStateFlow(false)
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
+
+    val lastScanTime: StateFlow<Long> = settingsRepository.settingsFlow
+        .map { it.lastScanTime }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
 
     init {
         viewModelScope.launch {
