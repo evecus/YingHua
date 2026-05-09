@@ -1,6 +1,7 @@
 package com.yinghua.player.ui.player
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -37,7 +38,9 @@ data class PlayerUiState(
     val subtitleTracks: List<TrackInfo> = emptyList(),
     val selectedAudioTrack: Int = -1,
     val selectedSubTrack: Int = -1,
-    val orientation: PlayOrientation = PlayOrientation.AUTO,
+    val orientation: PlayOrientation = PlayOrientation.DEFAULT,
+    // Resolved orientation for actual screen rotation (never DEFAULT)
+    val resolvedOrientation: PlayOrientation = PlayOrientation.PORTRAIT,
     val isCompleted: Boolean = false,
 )
 
@@ -68,9 +71,48 @@ class PlayerViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val settings = settingsRepository.settingsFlow.first()
-            _state.update { it.copy(orientation = settings.defaultOrientation) }
+            val resolved = resolveOrientation(settings.defaultOrientation, videoPath)
+            _state.update { it.copy(orientation = settings.defaultOrientation, resolvedOrientation = resolved) }
             initVlc(settings.decoderMode)
             loadMedia()
+        }
+    }
+
+    /**
+     * Resolve the actual screen orientation.
+     * DEFAULT: read video dimensions and pick landscape if width > height, else portrait.
+     * PORTRAIT: locked portrait (no sensor), prevents sensor overriding the setting.
+     */
+    private fun resolveOrientation(orientation: PlayOrientation, path: String): PlayOrientation {
+        return when (orientation) {
+            PlayOrientation.DEFAULT -> {
+                val (w, h) = getVideoDimensions(path)
+                if (w > 0 && h > 0 && w > h) PlayOrientation.LANDSCAPE else PlayOrientation.PORTRAIT
+            }
+            else -> orientation
+        }
+    }
+
+    /**
+     * Read video width & height using MediaMetadataRetriever.
+     * Returns (0, 0) on any error.
+     */
+    private fun getVideoDimensions(path: String): Pair<Int, Int> {
+        return try {
+            val retriever = MediaMetadataRetriever()
+            if (path.startsWith("http") || path.startsWith("rtsp") ||
+                path.startsWith("rtmp") || path.startsWith("mms")
+            ) {
+                retriever.setDataSource(path, emptyMap())
+            } else {
+                retriever.setDataSource(path)
+            }
+            val w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+            val h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+            retriever.release()
+            Pair(w, h)
+        } catch (e: Exception) {
+            Pair(0, 0)
         }
     }
 

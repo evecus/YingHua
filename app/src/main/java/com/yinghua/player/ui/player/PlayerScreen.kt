@@ -46,12 +46,14 @@ fun PlayerScreen(
     val context = LocalContext.current
     val activity = context as? Activity
 
-    // Apply orientation setting
-    LaunchedEffect(state.orientation) {
-        activity?.requestedOrientation = when (state.orientation) {
+    // Apply orientation setting using resolvedOrientation (never DEFAULT).
+    // PORTRAIT uses SCREEN_ORIENTATION_NOSENSOR so the sensor cannot override it.
+    LaunchedEffect(state.resolvedOrientation) {
+        activity?.requestedOrientation = when (state.resolvedOrientation) {
             PlayOrientation.LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            PlayOrientation.PORTRAIT  -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            PlayOrientation.PORTRAIT  -> ActivityInfo.SCREEN_ORIENTATION_NOSENSOR   // locked, ignore sensor
             PlayOrientation.AUTO      -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            PlayOrientation.DEFAULT   -> ActivityInfo.SCREEN_ORIENTATION_NOSENSOR   // fallback, should not occur
         }
     }
 

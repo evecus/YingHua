@@ -2,7 +2,7 @@ package com.yinghua.player.data.model
 
 data class AppSettings(
     val decoderMode: DecoderMode = DecoderMode.AUTO,
-    val defaultOrientation: PlayOrientation = PlayOrientation.AUTO,
+    val defaultOrientation: PlayOrientation = PlayOrientation.DEFAULT,
     val showThumbnail: Boolean = true,
     val continuousPlay: Boolean = true,
     val subtitleSize: Int = 16,
@@ -17,6 +17,7 @@ enum class DecoderMode(val label: String) {
 }
 
 enum class PlayOrientation(val label: String) {
+    DEFAULT("默认"),
     AUTO("跟随传感器"),
     LANDSCAPE("横屏"),
     PORTRAIT("竖屏"),
