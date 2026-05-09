@@ -75,10 +75,6 @@ fun YingHuaApp(externalVideoPath: String? = null) {
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     onBack = { navController.popBackStack() },
-                    onScan = {
-                        navController.popBackStack()
-                        // HomeViewModel will handle scan trigger from home
-                    },
                 )
             }
 

@@ -26,12 +26,12 @@ import com.yinghua.player.ui.theme.*
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
-    onScan: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val videoCount by viewModel.videoCount.collectAsStateWithLifecycle()
     val folderCount by viewModel.folderCount.collectAsStateWithLifecycle()
+    val isScanning by viewModel.isScanning.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -60,12 +60,28 @@ fun SettingsScreen(
                 SettingsInfoRow("已扫描", "$folderCount 个文件夹・$videoCount 个视频")
                 HorizontalDivider(color = DividerColor, modifier = Modifier.padding(horizontal = 16.dp))
                 ListItem(
-                    headlineContent = { Text("立即扫描") },
-                    leadingContent = { Icon(Icons.Outlined.Search, null, tint = GreenPrimary) },
-                    trailingContent = {
-                        Icon(Icons.Outlined.ChevronRight, null, tint = TextHint)
+                    headlineContent = {
+                        Text(if (isScanning) "扫描中…" else "立即扫描")
                     },
-                    modifier = Modifier.settingsClickable(onClick = onScan),
+                    leadingContent = {
+                        if (isScanning) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = GreenPrimary,
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Icon(Icons.Outlined.Search, null, tint = GreenPrimary)
+                        }
+                    },
+                    trailingContent = {
+                        if (!isScanning) {
+                            Icon(Icons.Outlined.ChevronRight, null, tint = TextHint)
+                        }
+                    },
+                    modifier = if (isScanning) Modifier else Modifier.settingsClickable {
+                        viewModel.startScan()
+                    },
                 )
             }
 

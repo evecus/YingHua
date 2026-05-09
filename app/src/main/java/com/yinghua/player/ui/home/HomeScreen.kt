@@ -47,11 +47,9 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             HomeTopBar(
-                isScanning = state.isScanning,
                 onSearchClick = onSearchClick,
                 onNetworkClick = onNetworkClick,
                 onSettingsClick = onSettingsClick,
-                onScanClick = { viewModel.startScan() },
             )
         },
         containerColor = NeutralBg,
@@ -88,11 +86,9 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeTopBar(
-    isScanning: Boolean,
     onSearchClick: () -> Unit,
     onNetworkClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onScanClick: () -> Unit,
 ) {
     TopAppBar(
         title = {
@@ -118,20 +114,13 @@ private fun HomeTopBar(
         },
         actions = {
             IconButton(onClick = onSearchClick) {
-                Icon(Icons.Outlined.Search, contentDescription = "搜索", tint = TextSecondary)
+                Icon(Icons.Outlined.Search, contentDescription = "搜索", tint = TextSecondary, modifier = androidx.compose.ui.Modifier.size(22.dp))
             }
             IconButton(onClick = onNetworkClick) {
-                Icon(Icons.Outlined.WifiFind, contentDescription = "网络视频", tint = TextSecondary)
-            }
-            IconButton(onClick = onScanClick, enabled = !isScanning) {
-                Icon(
-                    if (isScanning) Icons.Filled.Sync else Icons.Outlined.Refresh,
-                    contentDescription = "扫描",
-                    tint = if (isScanning) GreenPrimary else TextSecondary,
-                )
+                Icon(Icons.Outlined.Link, contentDescription = "网络视频", tint = TextSecondary, modifier = androidx.compose.ui.Modifier.size(22.dp))
             }
             IconButton(onClick = onSettingsClick) {
-                Icon(Icons.Outlined.Settings, contentDescription = "设置", tint = TextSecondary)
+                Icon(Icons.Outlined.Settings, contentDescription = "设置", tint = TextSecondary, modifier = androidx.compose.ui.Modifier.size(22.dp))
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
